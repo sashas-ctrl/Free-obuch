@@ -184,8 +184,13 @@ async def on_shutdown(app: web.Application):
 
 def create_app() -> web.Application:
     app = web.Application()
+
+    async def health(request):
+        return web.Response(text="OK")
+
+    app.router.add_get("/", health)
+
     app.on_startup.append(on_startup)
-    app.on_shutdown.append(on_shutdown)
 
     SimpleRequestHandler(
         dispatcher=dp,
