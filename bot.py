@@ -188,7 +188,7 @@ def create_app() -> web.Application:
     async def health(request):
         return web.Response(text="OK")
 
-    app.router.add_get("/", health)
+    app.router.add_get("/health", health)
 
     app.on_startup.append(on_startup)
 
