@@ -186,9 +186,18 @@ def create_app() -> web.Application:
     app = web.Application()
 
     async def health(request):
-        return web.Response(text="OK")
+        # Пингуем Supabase лёгким запросом, чтобы база не уходила в паузу
+        try:
+            def _ping_db():
+                supabase.table("bot_users").select("user_id").limit(1).execute()
+            await asyncio.to_thread(_ping_db)
+            return web.Response(text="OK")
+        except Exception as e:
+            # Даже если БД не отвечает — Render всё равно должен оставаться живым
+            return web.Response(text=f"OK (db error: {e})", status=200)
 
     app.router.add_get("/health", health)
+    app.router.add_get("/", health)  # чтобы пинги на корень тоже работали
 
     app.on_startup.append(on_startup)
 
